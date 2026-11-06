@@ -93,6 +93,7 @@ Corre 21 conversaciones de ejemplo (precios del catálogo, precios que faltan, t
 
 1. Subí el repo a GitHub e importalo en Vercel (team **OMG Que Linda**, `omg-que-linda`). Framework: Next.js; no hace falta tocar el build.
 2. **Plan:** Hobby es solo para uso personal/no comercial, y además limita los cron a una vez por día. Para la clínica corresponde **Pro** (verificá la política vigente de Vercel antes de lanzar).
+   > **Hoy el proyecto está en Hobby (decidido 6/11/2026, para probar con el sandbox de Meta).** Por eso `vercel.json` tiene los crons una vez por día (09:00 y 09:30 de Uruguay). Al pasar a Pro, volver a `*/5 * * * *` en `process-pending` y `0 * * * *` en `maintenance`: si no, un mensaje cuyo procesamiento falle puede tardar hasta 24 h en reintentarse.
 3. Storage → Marketplace → **Neon** → crear la base y conectarla al proyecto (crea `DATABASE_URL`).
 4. Settings → Environment Variables: cargá todas las de `.env.example`, marcadas como **Sensitive**. En producción `WHATSAPP_DRY_RUN=false`. `CRON_SECRET` lo usa Vercel Cron automáticamente.
 5. Migraciones contra la base de producción (desde tu máquina, con la `DATABASE_URL` de producción):

@@ -69,6 +69,12 @@ async function handle(msg: Message): Promise<string> {
   const [contact] = await db().select().from(contacts).where(eq(contacts.id, msg.contactId));
   const settings = await getSettings();
 
+  // Claudia pausada desde el panel: el mensaje queda guardado, pero no se responde ni ahora ni al reactivarla.
+  if (!settings.enabled) {
+    await finish(msg.id, "skipped", "Claudia pausada");
+    return "skipped-paused";
+  }
+
   // Ráfaga de mensajes: responde solo el último (que ve todo el historial).
   if (await hasNewerInbound(contact.id, msg.id, msg.timestamp)) {
     await finish(msg.id, "skipped", "hay un mensaje más nuevo");

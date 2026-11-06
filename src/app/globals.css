@@ -64,3 +64,11 @@ button.small { padding: 0.25rem 0.6rem; font-size: 0.85rem; }
 .alert.ok { background: #dcf3e6; color: #1f5f3c; }
 
 .login { max-width: 360px; margin: 12vh auto; }
+
+.switch { border: 1px solid var(--border); border-radius: var(--radius); padding: 0.6rem 0.7rem; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.45rem; }
+.switch-state { font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; }
+.switch .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.switch.on { background: #eefaf3; border-color: #bfe6cf; }
+.switch.on .dot { background: var(--ok); }
+.switch.off { background: #fdf0d5; border-color: #f0d49a; }
+.switch.off .dot { background: var(--warn); }

@@ -12,6 +12,14 @@ export default async function Config({ searchParams }: { searchParams: Promise<{
       {error && <div className="alert danger">Revisá estos campos: {error}</div>}
       <form action={saveSettingsAction}>
         <div className="card">
+          <h2 style={{ marginTop: 0 }}>Estado</h2>
+          <label className="row">
+            <input type="checkbox" name="enabled" defaultChecked={s.enabled} style={{ width: "auto" }} /> Claudia activa (si la desmarcás,
+            queda pausada: guarda los mensajes pero no propone ni envía nada)
+          </label>
+        </div>
+
+        <div className="card">
           <h2 style={{ marginTop: 0 }}>Datos del centro</h2>
           <div className="grid2">
             <div className="field">

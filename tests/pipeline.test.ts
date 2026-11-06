@@ -270,6 +270,47 @@ describe("modo automático", () => {
   });
 });
 
+describe("Claudia pausada", () => {
+  it("guarda el mensaje pero no llama a Claude, no crea borrador ni manda nada automático", async () => {
+    await d.insert(settings).values({
+      key: "main",
+      value: {
+        ...DEFAULT_SETTINGS,
+        enabled: false,
+        businessHours: Array(7).fill(null), // siempre cerrado
+        outOfHoursAutoReply: true, // aunque esté activado, pausada no manda el aviso
+        autoSend: { faq_horarios: true, faq_ubicacion: true, faq_general: true },
+      },
+    });
+    const from = phone();
+    await deliver(inboundText({ id: uid(), from, text: "¿Qué horario tienen?" }));
+    const c = await contactByWa(from);
+    const msgs = await d.select().from(messages).where(eq(messages.contactId, c.id));
+    expect(msgs).toHaveLength(1);
+    expect(msgs[0]).toMatchObject({ direction: "in", processing: "skipped", lastError: "Claudia pausada" });
+    expect(c.lastInboundAt).not.toBeNull(); // la ventana de 24 h se sigue registrando
+    expect(await draftsOf(c.id)).toHaveLength(0);
+    expect(agentMock.calls).toBe(0);
+  });
+
+  it("al reactivarla no responde lo acumulado, sí lo nuevo", async () => {
+    await d.insert(settings).values({ key: "main", value: { ...DEFAULT_SETTINGS, enabled: false } });
+    const from = phone();
+    await deliver(inboundText({ id: uid(), from, text: "Hola, ¿están?" }));
+
+    await d.update(settings).set({ value: { ...DEFAULT_SETTINGS, enabled: true } }).where(eq(settings.key, "main"));
+    // El cron no lo retoma: quedó "skipped", no "failed".
+    await d.update(messages).set({ createdAt: new Date(Date.now() - 5 * 60_000) });
+    await processBacklog();
+    expect(agentMock.calls).toBe(0);
+
+    await deliver(inboundText({ id: uid(), from, text: "¿Cuánto sale la limpieza?" }));
+    expect(agentMock.calls).toBe(1);
+    const c = await contactByWa(from);
+    expect(await draftsOf(c.id)).toHaveLength(1);
+  });
+});
+
 describe("reintentos", () => {
   it("si Claude falla, el mensaje queda 'failed' y el cron lo reintenta", async () => {
     agentMock.impl = async () => {

@@ -10,6 +10,12 @@ export const AUTO_CATEGORIES = ["faq_horarios", "faq_ubicacion", "faq_general"] 
 export type AutoCategory = (typeof AUTO_CATEGORIES)[number];
 
 export const settingsSchema = z.object({
+  /**
+   * Interruptor general. Pausada: los mensajes se siguen guardando (historial, ventana de 24 h, ecos),
+   * pero no se llama a Claude, no se crean borradores y no sale nada automático.
+   * Al reactivarla no se responde lo que llegó durante la pausa.
+   */
+  enabled: z.boolean(),
   businessName: z.string(),
   address: z.string(),
   mapsUrl: z.string(),
@@ -40,6 +46,7 @@ export const settingsSchema = z.object({
 export type Settings = z.infer<typeof settingsSchema>;
 
 export const DEFAULT_SETTINGS: Settings = {
+  enabled: true,
   businessName: "OMG Que Linda",
   address: "(completar dirección en Configuración)",
   mapsUrl: "",

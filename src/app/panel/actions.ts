@@ -9,7 +9,7 @@ import type { AppointmentStatus } from "@/db/schema";
 import { clearSessionCookie, requireSession } from "@/lib/auth";
 import { sendDraft } from "@/lib/pipeline";
 import { settingsSchema, type Settings } from "@/lib/settings";
-import { recordOutbound, saveSettings } from "@/lib/store";
+import { getSettings, recordOutbound, saveSettings } from "@/lib/store";
 import { renderTemplatePreview, TEMPLATES } from "@/lib/templates";
 import { sendTemplate } from "@/lib/whatsapp/client";
 
@@ -20,6 +20,16 @@ const back = (contactId: number, msg?: string, kind: "ok" | "error" = "ok") =>
 export async function logout() {
   await clearSessionCookie();
   redirect("/login");
+}
+
+/** Interruptor general de Claudia (barra lateral del panel). */
+export async function setClaudiaEnabled(formData: FormData) {
+  const session = await requireSession();
+  const enabled = formData.get("enabled") === "true";
+  const current = await getSettings();
+  await saveSettings({ ...current, enabled });
+  console.log(`[panel] Claudia ${enabled ? "activada" : "pausada"} por ${session.name}`);
+  revalidatePath("/panel", "layout");
 }
 
 export async function approveDraft(formData: FormData) {
@@ -124,6 +134,7 @@ export async function saveSettingsAction(formData: FormData) {
     return { open: str(formData, `open${d}`), close: str(formData, `close${d}`) };
   });
   const candidate: Settings = {
+    enabled: formData.get("enabled") === "on",
     businessName: str(formData, "businessName"),
     address: str(formData, "address"),
     mapsUrl: str(formData, "mapsUrl"),

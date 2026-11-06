@@ -46,6 +46,12 @@ export default async function Inbox() {
   return (
     <>
       <h1>Bandeja</h1>
+      {!settings.enabled && (
+        <div className="alert">
+          <strong>Claudia está pausada.</strong> Los mensajes se siguen guardando acá, pero no se generan borradores ni se envía nada
+          automático. Lo que llegue durante la pausa no se responde al reactivarla: contestalo desde la app del celular.
+        </div>
+      )}
       <p className="muted">
         {pending} {pending === 1 ? "borrador espera" : "borradores esperan"} aprobación.
         {process.env.WHATSAPP_DRY_RUN === "true" && " · Modo simulación: no se envía nada a WhatsApp."}

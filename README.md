@@ -22,6 +22,7 @@ WhatsApp ──webhook──▶ /api/whatsapp (Next.js en Vercel, runtime Node)
 
 - **Idempotencia:** `messages.wa_message_id` es único; un reintento de Meta no duplica nada. El procesamiento usa un lock optimista (`processing` + `attempts`), así que el cron y el webhook no responden dos veces.
 - **Cola:** se usa `after()` de Next (que en Vercel es `waitUntil`) y el cron reintenta lo que haya fallado (hasta 3 intentos). Es la opción simple que propone el handover para la v1; si hace falta más garantía, cambiar por Vercel Queues o Upstash QStash en `src/app/api/whatsapp/route.ts`.
+- **Pausar a Claudia:** botón "Pausar / Activar" en la barra lateral del panel (o en Configuración). Pausada, los mensajes se siguen guardando, pero no se llama a Claude ni sale nada automático; lo que llegó durante la pausa no se responde al reactivarla.
 - **Ráfagas:** si la clienta manda 3 mensajes seguidos, Claudia responde solo al último (con todo el historial).
 - **No pisar al equipo (Coexistence):** los mensajes que el equipo manda desde la app del celular llegan como eco (`smb_message_echoes`), se guardan en el historial, descartan el borrador pendiente y Claudia se calla durante `humanCooldownMinutes` (30 min por defecto).
 - **Ventana de 24 h:** el panel no deja mandar texto libre si pasaron 24 h desde el último mensaje del cliente; ofrece solo las plantillas de `src/lib/templates.ts`.

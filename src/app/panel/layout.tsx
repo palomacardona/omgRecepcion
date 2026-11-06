@@ -1,15 +1,26 @@
 import Link from "next/link";
 import { requireSession } from "@/lib/auth";
-import { logout } from "./actions";
+import { getSettings } from "@/lib/store";
+import { logout, setClaudiaEnabled } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   const session = await requireSession();
+  const { enabled } = await getSettings();
   return (
     <div className="shell">
       <nav className="nav">
         <div className="brand">Claudia 💖</div>
+        <form action={setClaudiaEnabled} className={`switch ${enabled ? "on" : "off"}`}>
+          <input type="hidden" name="enabled" value={enabled ? "false" : "true"} />
+          <div className="switch-state">
+            <span className="dot" /> {enabled ? "Claudia activa" : "Claudia pausada"}
+          </div>
+          <button type="submit" className={`small ${enabled ? "secondary" : ""}`}>
+            {enabled ? "Pausar" : "Activar"}
+          </button>
+        </form>
         <Link href="/panel">Bandeja</Link>
         <Link href="/panel/turnos">Solicitudes de turno</Link>
         <Link href="/panel/derivaciones">Derivaciones</Link>

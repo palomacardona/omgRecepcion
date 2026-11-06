@@ -22,6 +22,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           </button>
         </form>
         <Link href="/panel">Bandeja</Link>
+        <Link href="/panel/probar">Probar a Claudia</Link>
         <Link href="/panel/turnos">Solicitudes de turno</Link>
         <Link href="/panel/derivaciones">Derivaciones</Link>
         <Link href="/panel/catalogo">Catálogo</Link>

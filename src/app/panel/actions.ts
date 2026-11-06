@@ -10,6 +10,7 @@ import { clearSessionCookie, requireSession } from "@/lib/auth";
 import { sendDraft } from "@/lib/pipeline";
 import { settingsSchema, type Settings } from "@/lib/settings";
 import { getSettings, recordOutbound, saveSettings } from "@/lib/store";
+import { simulateConversation, type SimResult, type SimTurn } from "@/lib/simulate";
 import { renderTemplatePreview, TEMPLATES } from "@/lib/templates";
 import { sendTemplate } from "@/lib/whatsapp/client";
 
@@ -20,6 +21,17 @@ const back = (contactId: number, msg?: string, kind: "ok" | "error" = "ok") =>
 export async function logout() {
   await clearSessionCookie();
   redirect("/login");
+}
+
+/** "Probar a Claudia": conversación de prueba. No guarda nada ni envía por WhatsApp. */
+export async function simulateAction(turns: SimTurn[]): Promise<SimResult> {
+  await requireSession();
+  try {
+    return await simulateConversation(Array.isArray(turns) ? turns : []);
+  } catch (err) {
+    console.error("[probar] error:", err instanceof Error ? err.message : err);
+    return { ok: false, error: "No pude hablar con Claude. Probá de nuevo en un rato." };
+  }
 }
 
 /** Interruptor general de Claudia (barra lateral del panel). */

@@ -311,6 +311,52 @@ describe("Claudia pausada", () => {
   });
 });
 
+describe("Probar a Claudia (simulador)", () => {
+  const counts = async () => ({
+    msgs: (await d.select().from(messages)).length,
+    drafts: (await d.select().from(drafts)).length,
+    appts: (await d.select().from(appointmentRequests)).length,
+    hand: (await d.select().from(handoffs)).length,
+  });
+
+  it("responde y describe turnos/derivaciones sin guardar nada", async () => {
+    const { simulateConversation } = await import("@/lib/simulate");
+    agentMock.impl = reply("¡Listo! Te confirmamos en un ratito 😊", [
+      { tool: "crear_solicitud_turno", input: { nombre: "Ana", tratamiento: "Masaje", preferencia_dias: "lunes", preferencia_horario: "tarde", notas: "" } },
+      { tool: "derivar_a_humano", input: { motivo: "pregunta por pagos", prioridad: "media" } },
+    ]);
+    const before = await counts();
+    const res = await simulateConversation([{ role: "cliente", text: "Soy Ana, masaje el lunes de tarde" }]);
+    expect(res.ok).toBe(true);
+    if (res.ok) {
+      expect(res.reply).toContain("confirmamos");
+      expect(res.notes.join("\n")).toMatch(/solicitud de turno: Ana · Masaje/);
+      expect(res.notes.join("\n")).toMatch(/Derivaría al equipo \(prioridad media\)/);
+    }
+    expect(await counts()).toEqual(before);
+  });
+
+  it("emergencia: respuesta fija sin llamar a Claude", async () => {
+    const { simulateConversation } = await import("@/lib/simulate");
+    const res = await simulateConversation([{ role: "cliente", text: "me cuesta respirar después del relleno" }]);
+    expect(res.ok && res.reply).toContain("911");
+    expect(agentMock.calls).toBe(0);
+  });
+
+  it("la red de seguridad se muestra si Claudia no derivó", async () => {
+    const { simulateConversation } = await import("@/lib/simulate");
+    agentMock.impl = reply("¡Claro! Te cuento…");
+    const res = await simulateConversation([{ role: "cliente", text: "Estoy embarazada, ¿puedo?" }]);
+    expect(res.ok && res.notes.join("\n")).toMatch(/Red de seguridad: detectó salud/);
+  });
+
+  it("pide que el último mensaje sea del cliente", async () => {
+    const { simulateConversation } = await import("@/lib/simulate");
+    const res = await simulateConversation([{ role: "claudia", text: "Hola" }]);
+    expect(res.ok).toBe(false);
+  });
+});
+
 describe("reintentos", () => {
   it("si Claude falla, el mensaje queda 'failed' y el cron lo reintenta", async () => {
     agentMock.impl = async () => {

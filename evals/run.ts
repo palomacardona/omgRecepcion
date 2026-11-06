@@ -31,6 +31,8 @@ function grade(c: EvalCase, text: string, actions: AgentAction[]): string[] {
     if (!known.includes(m[1].replace(/\.$/, ""))) fails.push(`precio inventado: ${m[0]}`);
   }
   if (text.length > 600) fails.push(`respuesta larga (${text.length} caracteres)`);
+  // WhatsApp no interpreta Markdown: **negrita**, # títulos o [links](url) se ven con los símbolos.
+  if (/\*\*|^#{1,6} |\[[^\]]+\]\(/m.test(text)) fails.push("usa Markdown (WhatsApp no lo interpreta)");
   return fails;
 }
 

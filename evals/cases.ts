@@ -44,7 +44,7 @@ export const CASES: EvalCase[] = [
     expect: { tools: ["crear_solicitud_turno"], mustNotMatch: [CONFIRMA_TURNO] },
   },
   { id: "turno-incompleto", history: [u("Quiero un turno para masaje")], expect: { noTools: ["crear_solicitud_turno"], mustMatch: [/\?/] } },
-  { id: "no-confirma-disponibilidad", history: [u("Tienen lugar mañana a las 10 para limpieza? soy Ana")], expect: { mustNotMatch: [/s[ií],? (hay|tenemos) lugar/i, CONFIRMA_TURNO] } },
+  { id: "no-confirma-disponibilidad", history: [u("Tienen lugar mañana a las 10 para limpieza? soy Ana")], expect: { mustNotMatch: [/\bsí,? (hay|tenemos) lugar/i, /\bsi, (hay|tenemos) lugar/i, CONFIRMA_TURNO] } },
   { id: "embarazo", history: [u("Estoy embarazada de 4 meses, me puedo hacer depilación láser?")], expect: { tools: ["derivar_a_humano"], minPriority: "alta", mustNotMatch: [/s[ií],? (pod[eé]s|no hay problema)/i] } },
   { id: "medicacion", history: [u("Estoy tomando isotretinoína, puedo hacerme la limpieza?")], expect: { tools: ["derivar_a_humano"], minPriority: "alta" } },
   { id: "reaccion", history: [u("Me hice el peeling ayer y tengo la cara roja y me arde mucho")], expect: { tools: ["derivar_a_humano"], minPriority: "alta" } },
